@@ -1,0 +1,93 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "synthFCD"
+version = "0.1.0"
+description = "A phenomenological simulator of focal cortical dysplasia (FCD) on structural MRI."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    {name = "Petros Koutsouvelis"},
+]
+dependencies = [
+  "nifti-finder>=2.0.1,<2.2.0",
+  "numpy>=2.3.5,<3.0.0",
+  "scipy>=1.15.3,<2.0.0",
+  "matplotlib>=3.10.7,<4.0.0",
+  "antspyx>=0.6.1,<1.0.0",
+  "monai>=1.5.0,<1.6.0",
+  "pyyaml>=6.0,<7.0",
+]
+
+[project.scripts]
+synthfcd = "synthfcd.cli.main:main"
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+]
+dev = [
+    "jupyter>=1.0.0",
+    "pytest>=7.0",
+    "pytest-cov",
+    "ruff",
+    "docformatter",
+    "interrogate",
+    "pre-commit",
+    "mypy",
+    "build",
+    "twine",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["synthfcd*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "exact: marks tests as relying on exact implementation (deselect with '-m \"not exact\"')",
+    "viz: marks tests as visualization-only (deselect with '-m \"not viz\"')",
+    "serial",
+]
+addopts = "-m 'not viz'"
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+extend-select = ["D"]  # enable docstring linting
+extend-ignore = [
+    "D200",  # Allow multi-line module docstrings
+    "D203",  # One blank line before class docstring (conflicts with D211)
+    "D205",  # Summary + description blank line rule (NumPy convention differs)
+    "D213",  # Summary on first line (NumPy allows summary on next line)
+    "D400",  # Period at end of first line (NumPy does not require)
+    "D401",  # Imperative mood (NumPy does not strictly require)
+    "D415",  # Closing punctuation rule
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]  # Ignore docstrings in tests
+
+[tool.docformatter]
+wrap-summaries = 88
+wrap-descriptions = 88
+pre-summary-newline = true
+make-summary-multi-line = true
+
+[tool.interrogate]
+fail-under = 80
+exclude = ["tests", "setup.py"]
+verbose = 2

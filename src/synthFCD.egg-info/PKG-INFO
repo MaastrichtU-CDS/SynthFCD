@@ -1,3 +1,34 @@
+Metadata-Version: 2.4
+Name: synthFCD
+Version: 0.1.0
+Summary: A phenomenological simulator of focal cortical dysplasia (FCD) on structural MRI.
+Author: Petros Koutsouvelis
+License: MIT
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: nifti-finder<2.2.0,>=2.0.1
+Requires-Dist: numpy<3.0.0,>=2.3.5
+Requires-Dist: scipy<2.0.0,>=1.15.3
+Requires-Dist: matplotlib<4.0.0,>=3.10.7
+Requires-Dist: antspyx<1.0.0,>=0.6.1
+Requires-Dist: monai<1.6.0,>=1.5.0
+Requires-Dist: pyyaml<7.0,>=6.0
+Provides-Extra: test
+Requires-Dist: pytest>=7.0; extra == "test"
+Provides-Extra: dev
+Requires-Dist: jupyter>=1.0.0; extra == "dev"
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: docformatter; extra == "dev"
+Requires-Dist: interrogate; extra == "dev"
+Requires-Dist: pre-commit; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Requires-Dist: build; extra == "dev"
+Requires-Dist: twine; extra == "dev"
+Dynamic: license-file
+
 # SynthFCD
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
