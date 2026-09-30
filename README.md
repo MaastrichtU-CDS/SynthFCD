@@ -1,6 +1,6 @@
 # SynthFCD
 
-![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
+![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
 
 A phenomenological simulator of focal cortical dysplasia (FCD) on structural MRI.
 
@@ -288,4 +288,4 @@ publication.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+BSD-3-Clause. See [LICENSE](LICENSE).
