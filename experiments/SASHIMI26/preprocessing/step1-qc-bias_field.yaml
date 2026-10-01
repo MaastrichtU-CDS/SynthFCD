@@ -1,0 +1,41 @@
+# This config collects all skull-stripped images, independent of modality and 
+# denoted by the "*_bet" suffix and applies bias field correction only to ones
+# that pass the spacing threshold. See the step0 HD-BET configs for skull-stripping.
+# This config can be reused across any cohort (synthfcd or bonnfcd).
+  
+settings:
+  num_workers: 8
+  logs_root: "/projects/prjs1526/logs/niiflow-preproc/synthfcd-bonn-step1-qc-bias_field"  # replace with your path
+              
+  staging_params:
+    stager_name: FileStager
+    params:
+      allow_failed_entries: true
+      pointers:
+        steps.qc.params.image: input
+        steps.bias_field.params.image: input
+        steps.bias_field.save_options.out_image: output
+
+  pipeline_params:
+    verbose: true
+    steps:
+      qc:
+        name: CheckVoxelSpacing
+        params:
+          image: "{active.path}"
+          expected: [5, 5, 5]
+          op: <=
+      bias_field:
+        name: ANTsBiasFieldCorrection
+        params:
+          enable: "ctx.outputs.qc.passed"
+          image: "{active.path}"
+        save_options:
+          out_image: "{active.path|strip:_bet.nii.gz}_clean.nii.gz"
+    order: [qc, bias_field]
+
+inputs:
+  mode: search
+  roots: "/scratch-shared/pkoutsouvelis/bonn_fcd"  # replace with your path
+  explorer_params:
+    pattern: "**/anat/*_bet.nii*"

@@ -1,0 +1,101 @@
+# This config collects all T1w (any)->FLAIR (first) pairs 
+# that passed step1 and applies:
+# - Rigid co-registration of FLAIR to T1w
+# - Affine registration of T1w to MNI152
+# - Transformation of FLAIR to MNI152
+# - Transformation of lesion mask (FLAIR space) to MNI152
+# - Cropping to bounding box for T1wm FLAIR and lesion mask
+# Contrary to pretraining, here we want one pair per session, so we'll make this
+# explicit by choosing a single T1w as well (instead of directly reading anchor)
+
+settings:
+  num_workers: 8
+  logs_root: "/projects/prjs1526/logs/niiflow-preproc/bonnfcd-step2-coreg-reg-crop"  # replace with your path
+  timeout: 1200
+
+  staging_params:
+    stager_name: FileStager
+    params:
+      allow_failed_entries: true
+      pointers:
+        steps.flair_to_t1.params.image: input
+        steps.flair_to_t1.params.target: input
+        steps.lesion_to_mni.params.image: input
+
+  pipeline_params:
+    verbose: true
+    steps:
+      flair_to_t1:
+        name: ANTsRegistration
+        params:
+          image:
+            root: "{active.parent}"
+            search:
+              pattern: "*_FLAIR_clean.nii*"
+            resolve_results: first
+          target:
+            root: "{active.parent}"
+            search:
+              pattern: "*_T1w_clean.nii*" # explicitly choose one T1w-FLAIR pair per session
+            resolve_results: first
+          mode: Rigid
+          apply_forward: false
+      t1_to_mni:
+        name: ANTsRegistration
+        params:
+          image: "{params.steps.flair_to_t1.params.target.path}"
+          target: "/projects/prjs1526/mni-templates/icbm_mni152_t1_09a_asym_bet.nii.gz"  # replace with your path
+          mode: Affine
+      flair_to_mni:
+        name: ANTsApplyTransforms
+        params:
+          image: "{params.steps.flair_to_t1.params.image.path}"
+          target: "/projects/prjs1526/mni-templates/icbm_mni152_t1_09a_asym_bet.nii.gz"  # replace with your path
+          interpolation: linear
+          transformlist:
+            - "ctx.outputs.t1_to_mni.fwdtransforms.[0]"
+            - "ctx.outputs.flair_to_t1.fwdtransforms.[0]"
+      lesion_to_mni:
+        name: ANTsApplyTransforms
+        params:
+          image:
+            root: "{active.parent}"
+            search:
+              pattern: "*_FLAIR_roi.nii*"
+            resolve_results: first
+          target: "/projects/prjs1526/mni-templates/icbm_mni152_t1_09a_asym_bet.nii.gz"  # replace with your path
+          interpolation: genericLabel
+          transformlist:
+            - "ctx.outputs.t1_to_mni.fwdtransforms.[0]"
+            - "ctx.outputs.flair_to_t1.fwdtransforms.[0]"
+      crop_t1:
+        name: CropToMask
+        params:
+          image: "ctx.outputs.t1_to_mni.out_image"
+        save_options:
+          out_image: "{active.path|strip:_clean.nii.gz}_reg-cropped.nii.gz"
+      crop_flair:
+        name: CropToRange
+        params:
+          image: "ctx.outputs.flair_to_mni.out_image"
+          ranges: "ctx.outputs.crop_t1.ranges"
+        save_options:
+          out_image: "{active.path|strip:_T1w_clean.nii.gz}_FLAIR_reg-cropped.nii.gz"
+      crop_lesion:
+        name: CropToRange
+        params:
+          image: "ctx.outputs.lesion_to_mni.out_image"
+          ranges: "ctx.outputs.crop_t1.ranges"
+        save_options:
+          out_image: "{active.path|strip:_T1w_clean.nii.gz}_FLAIR_roi_reg-cropped.nii.gz"
+    order: [flair_to_t1, t1_to_mni, flair_to_mni, lesion_to_mni, crop_t1, crop_flair, crop_lesion]
+
+inputs:
+  mode: search
+  roots: "/scratch-shared/pkoutsouvelis/bonn_fcd"  # replace with your path
+  explorer_params:
+    pattern: "**/anat/*_T1w_clean.nii*"
+    filters:
+      name: IncludeIfFileExists
+      kwargs:
+        filename_pattern: "*_FLAIR_clean.nii*"

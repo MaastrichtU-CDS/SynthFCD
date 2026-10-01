@@ -1,0 +1,99 @@
+# Although T1w-FLAIR pairs match in size, the generated SynthSeg mask was off 
+# by ~0-2 voxels per spatial dim (unclear why; visually it's aligned), triggering 
+# synthFCD errors. This workflow pads and crops the mask to ensure matching
+# shapes, while performing a T1w-FLAIR matching sanity check. 
+
+settings:
+  num_workers: 8
+  logs_root: "/projects/prjs1526/logs/niiflow-preproc/synthfcd-clean-step4-match-exact-shape"  # replace with your path
+
+  staging_params:
+    stager_name: FileStager
+    params:
+      allow_failed_entries: true
+      pointers:
+        steps.shape.params.image: input
+        steps.crop.params.image: input
+        steps.qc_flair.params.image: input
+        steps.copy_t1.params.path: input
+        steps.copy_flair.params.path: input
+        steps.save_synthseg.save_options.out_image: output
+        steps.copy_t1.params.dest: output
+        steps.copy_flair.params.dest: output
+
+  pipeline_params:
+    verbose: true
+    steps:
+      shape:
+        name: CheckDimensions
+        params:
+          image: "{active.path}"
+          expected: [300, 300, 300] # does not matter
+      crop:
+        name: CenterCrop
+        params:
+          image: "{active.path|strip:_T1w.nii.gz}_synthseg.nii.gz"
+          shape: ctx.outputs.shape.value
+      pad:
+        name: CenterPad
+        params:
+          image: ctx.outputs.crop.out_image
+          shape: ctx.outputs.shape.value
+      qc_synthseg:
+        name: CheckDimensions
+        params:
+          image: ctx.outputs.pad.out_image
+          expected: ctx.outputs.shape.value
+          op: ==
+          log: True
+      qc_flair:
+        name: CheckDimensions
+        params:
+          image: "{active.path|strip:_T1w.nii.gz}_FLAIR.nii.gz"
+          expected: ctx.outputs.shape.value
+          op: ==
+          log: True
+      save_synthseg:
+        name: GetImage
+        params:
+          enable: ctx.outputs.qc_synthseg.passed
+          image: ctx.outputs.pad.out_image
+        save_options:
+          out_image:
+            root:
+              mode: active
+              mirror:
+                source: "/scratch-shared/pkoutsouvelis/synthfcd-clean"  # replace with your path
+                target: "/scratch-shared/pkoutsouvelis/synthfcd-base"  # replace with your path
+            name: "{active.name|strip:_T1w.nii.gz}_synthseg.nii.gz"
+      copy_t1:
+        name: Rename
+        params:
+          path: "{active.path}"
+          dest:
+            root:
+              mode: active
+              mirror:
+                source: "/scratch-shared/pkoutsouvelis/synthfcd-clean"  # replace with your path
+                target: "/scratch-shared/pkoutsouvelis/synthfcd-base"  # replace with your path
+            name: "{active.name}"
+          copy: true
+      copy_flair:
+        name: Rename
+        params:
+          path: "{active.path|strip:_T1w.nii.gz}_FLAIR.nii.gz"
+          dest:
+            root:
+              mode: active
+              mirror:
+                source: "/scratch-shared/pkoutsouvelis/synthfcd-clean"  # replace with your path
+                target: "/scratch-shared/pkoutsouvelis/synthfcd-base"  # replace with your path
+            name: "{active.name|strip:_T1w.nii.gz}_FLAIR.nii.gz"
+          copy: true
+    order: [shape, crop, pad, qc_synthseg, qc_flair, save_synthseg, copy_t1, copy_flair]
+
+inputs:
+  mode: search
+  roots: "/scratch-shared/pkoutsouvelis/synthfcd-clean"  # replace with your path
+  explorer_params:
+    pattern: "**/anat/*_T1w.nii*"

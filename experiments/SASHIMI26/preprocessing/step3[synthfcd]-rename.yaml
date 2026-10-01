@@ -1,0 +1,65 @@
+# This workflow moves all resulting T1w-FLAIR pairs into a different dataset
+# for cleanup purposes. Unique pairs are identified by their filename body.
+# The resulting dataset will be afterwards expanded (other script; not niiflow)
+# into a flat dataset with synthetic subject IDs, where each synthetic subject 
+# is a T1w-FLAIR pair.
+
+settings:
+  num_workers: 4
+  logs_root: "/projects/prjs1526/logs/synthfcd-fomo300k/step3-rename"  # replace with your path
+
+  staging_params:
+    stager_name: FileStager
+    params:
+      allow_failed_entries: true
+      pointers:
+        steps.rename_t1.params.path: input
+        steps.rename_flair.params.path: input
+        steps.rename_seg.params.path: input
+        steps.rename_t1.params.dest: output
+        steps.rename_flair.params.dest: output
+        steps.rename_seg.params.dest: output
+
+  pipeline_params:
+    verbose: true
+    steps:
+      rename_t1:
+        name: Rename
+        params:
+          path: "{active.path}"
+          dest:
+            root:
+              mode: active
+              mirror:
+                source: "/scratch-shared/pkoutsouvelis/SynthFCD-FOMO300k"  # replace with your path
+                target: "/scratch-shared/pkoutsouvelis/synthfcd-fomo300k-clean"  # replace with your path
+            name: "{active.name|strip:_reg-cropped.nii.gz}.nii.gz"
+      rename_flair:
+        name: Rename
+        params:
+          path: "{active.path|strip:_T1w_reg-cropped.nii.gz}_FLAIR_reg-cropped.nii.gz"
+          dest:
+            root:
+              mode: active
+              mirror:
+                source: "/scratch-shared/pkoutsouvelis/SynthFCD-FOMO300k"  # replace with your path
+                target: "/scratch-shared/pkoutsouvelis/synthfcd-fomo300k-clean"  # replace with your path
+            name: "{active.name|strip:T1w_reg-cropped.nii.gz}FLAIR.nii.gz"
+      rename_seg:
+        name: Rename
+        params:
+          path: "{active.path|strip:.nii.gz}_synthseg.nii.gz"
+          dest:
+            root:
+              mode: active
+              mirror:
+                source: "/scratch-shared/pkoutsouvelis/SynthFCD-FOMO300k"  # replace with your path
+                target: "/scratch-shared/pkoutsouvelis/synthfcd-fomo300k-clean"  # replace with your path
+            name: "{active.name|strip:T1w_reg-cropped.nii.gz}synthseg.nii.gz"
+    order: [rename_t1, rename_flair, rename_seg]
+
+inputs:
+  mode: search
+  roots: "/scratch-shared/pkoutsouvelis/SynthFCD-FOMO300k"  # replace with your path
+  explorer_params:
+    pattern: "**/anat/*_T1w_reg-cropped.nii*"

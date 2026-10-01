@@ -1,9 +1,16 @@
 LATER VERSIONS:
 1. Support different spacing per modality! Working on native resolution yields more realistic and controllable texture restoration.
 2. Bottom of sulcus detection likely needing hemisphere convex hull, otherwise peaks inside.
-3. Workflow orchestration with niiflow-preproc under-the-hood (end-to-end, inc. file exploration, staging, and execution). Also switch to `spawn` mp context.
+3. Workflow orchestration with niiflow-preproc under-the-hood (end-to-end, inc. file exploration, staging, and execution).
 4. Fix cortical expansion "white band" artifact in-between two neighboring sulci expanding in opposite directions.
 5. Target growth should accept target as input, even if empty. Now target growth fns can be chained without knowledge of the shared target state; nothing prevents growth on top of existing target. Not relevant for *simple_fcd*, since single growth fn is used but useful for future use (e.g., dual pathology, transmantle sign extending cortical lesion).
 6. Chaining target growth fns with the same callable name write to the same growth_stats key; find more discriminative keys.
 7. TypeAlias for DeformationField and validation helpers for common types (e.g., deformation fields, application fields).
 8. Make deformation effects return single composed field instead of lists; warp using the composed field.
+
+CURRENT VERSION:
+1. Switch to `spawn` mp context to remove test warning
+2. Publish to PYPI
+3. Add SynthSeg and HD-BET configs + eval notebook
+4. Add paper link and citation in README
+5. Add an ensemble model in HuggingFace and an anyBrainer inference config (maybe script that runs preprocessing + inference end-to-end).

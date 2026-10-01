@@ -1,0 +1,117 @@
+# Finalize a preprocessed dataset for use in anyBrainer:
+# clamp intensities, z-transform normalize, reorient to RAS, convert to npy
+# and save as {mod}.npy.
+# The source dir is known to contain a single T1w_synthfcd, FLAIR_synthfcd, and 
+# lesion_synthfcd, sharing the same body.
+
+settings:
+  num_workers: 8
+  logs_root: "/projects/prjs1526/logs/niiflow-preproc/simple_fcd-minimal-44-finalize"  # replace with your path
+
+  staging_params:
+    stager_name: FileStager
+    params:
+      allow_failed_entries: false
+      pointers:
+        steps.clamp_t1.params.image: input
+        steps.clamp_flair.params.image: input
+        steps.reorient_seg.params.image: input
+        steps.numpy_t1.save_options.array: output
+        steps.numpy_flair.save_options.array: output
+        steps.numpy_seg.save_options.array: output
+
+
+  pipeline_params:
+    verbose: true
+    steps:
+      clamp_t1:
+        name: ClampIntensities
+        params:
+          image: "{active.path}"
+          lower_pct: 0.5
+          upper_pct: 99.5
+          non_zero: true
+      norm_t1:
+        name: ZTransformNorm
+        params:
+          image: ctx.outputs.clamp_t1.out_image
+          non_zero: true
+      reorient_t1:
+        name: Reorient
+        params:
+          image: ctx.outputs.norm_t1.out_image
+          orientation: RAS
+          convention: nibabel
+      numpy_t1:
+        name: ToNumpy
+        params:
+          image: ctx.outputs.reorient_t1.out_image
+          dtype: float32
+        save_options:
+          array:
+            root:
+              mode: parent_up # standardize for anybrainer; no anat
+              value: 1
+              mirror:
+                source: "/scratch-shared/pkoutsouvelis/simple_fcd-minimal-44"  # replace with your path
+                target: "/scratch-shared/pkoutsouvelis/simple_fcd-minimal-44-npy"  # replace with your path
+            name: "t1.npy"
+      clamp_flair:
+        name: ClampIntensities
+        params:
+          image: "{active.path|strip:_T1w_synthfcd.nii.gz}_FLAIR_synthfcd.nii.gz"
+          lower_pct: 0.5
+          upper_pct: 99.5
+          non_zero: true
+      norm_flair:
+        name: ZTransformNorm
+        params:
+          image: ctx.outputs.clamp_flair.out_image
+          non_zero: true
+      reorient_flair:
+        name: Reorient
+        params:
+          image: ctx.outputs.norm_flair.out_image
+          orientation: RAS
+          convention: nibabel
+      numpy_flair:
+        name: ToNumpy
+        params:
+          image: ctx.outputs.reorient_flair.out_image
+          dtype: float32
+        save_options:
+          array:
+            root:
+              mode: parent_up # standardize for anybrainer; no anat
+              value: 1
+              mirror:
+                source: "/scratch-shared/pkoutsouvelis/simple_fcd-minimal-44"  # replace with your path
+                target: "/scratch-shared/pkoutsouvelis/simple_fcd-minimal-44-npy"  # replace with your path
+            name: "flair.npy"
+      reorient_seg:
+        name: Reorient
+        params:
+          image: "{active.path|strip:_synthfcd.nii.gz}_lesion_synthfcd.nii.gz"
+          orientation: RAS
+          convention: nibabel
+      numpy_seg:
+        name: ToNumpy
+        params:
+          image: ctx.outputs.reorient_seg.out_image
+          dtype: uint8
+        save_options:
+          array:
+            root:
+              mode: parent_up # standardize for anybrainer; no anat
+              value: 1
+              mirror:
+                source: "/scratch-shared/pkoutsouvelis/simple_fcd-minimal-44"  # replace with your path
+                target: "/scratch-shared/pkoutsouvelis/simple_fcd-minimal-44-npy"  # replace with your path
+            name: "mask.npy"
+    order: [clamp_t1, norm_t1, reorient_t1, numpy_t1, clamp_flair, norm_flair, reorient_flair, numpy_flair, reorient_seg, numpy_seg]
+
+inputs:
+  mode: search
+  roots: "/scratch-shared/pkoutsouvelis/simple_fcd-minimal-44"  # replace with your path
+  explorer_params:
+    pattern: "**/anat/*_T1w_synthfcd.nii*"

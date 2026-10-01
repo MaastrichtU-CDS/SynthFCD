@@ -1,0 +1,280 @@
+TrainWorkflow:
+  # Global settings
+  global_settings:
+    seed:
+      - 42
+      - 43
+      - 44
+    project: synthFCD
+    experiment: 
+      - simple_fcd-minimal_44-finetune_42-used_dec
+      - simple_fcd-minimal_44-finetune_43-used_dec
+      - simple_fcd-minimal_44-finetune_44-used_dec
+    root_dir: /projects/prjs1526/anyBrainer/experiments  # replace with your path
+
+  # Logging settings
+  logging_settings:
+    dev_mode: False
+    worker_logs: False
+    save_logs: True
+    wandb_enable: True
+    wandb_entity: petros-koutsouvelis-maastricht-university
+    wandb_watch_enable: False
+
+  # Data settings
+  pl_datamodule_settings:
+    name: MultimodalDataModule
+    data_dir: /scratch-shared/pkoutsouvelis/bonn_fcd-train-npy  # replace with your path
+    data_handler_kwargs:
+      data_format: GenericNifti
+      exts: [".npy"]
+    train_val_test_split: [1.0, 0.0, 0.0]
+    num_workers: 8
+    batch_size: 4
+    extra_dataloader_kwargs:
+      shuffle: True
+      pin_memory: False
+    train_transforms: 
+      name: get_segmentation_transforms
+      input_size: 128
+      standard_spatial_size: [160, 192, 160]
+      keys: ["ch1", "ch2"]
+      seg_key: "label"
+      out_key: "img"
+      n_patches: 2
+      n_pos: 1
+      n_neg: 1
+      pad_keys_mode: zeros
+      overfit_mode: False
+      val_mode: False
+    extra_kwargs:
+      modalities_per_ch: 
+        - ["t1"]
+        - ["flair"]
+      distinct_modalities: True
+      distinct_acquisitions: True
+      labels_settings:
+        labels_file: "mask.npy"
+        store_key: "label"
+
+  # Model
+  pl_module_settings:
+    name: MultimodalDownstreamModel
+    model_kwargs:
+      name: Multimodal3DSwinMIMFPN
+      in_channels: 2
+      patch_size: 2
+      depths: [2, 2, 6, 2]
+      num_heads: [3, 6, 12, 24]
+      window_size: 7
+      embed_dim: 48
+      use_v2: True
+      extra_swin_kwargs:
+        use_checkpoint: True
+      use_vanilla_swin: True
+      merge_mode: and
+      inject_modality_tokens: False
+      expected_modalities: ~
+      fusion: none
+      fpn_width: 32
+      out_channels: 1
+    weights_init_settings:
+      weights_init_fn: init_swin_v2
+      load_pretrain_weights: /projects/prjs1526/anyBrainer/experiments/synthFCD/simple_fcd-minimal_44/checkpoints/last.ckpt  # replace with your path
+      load_param_group_prefix: 
+        - model.encoder
+        - model.fpn
+        - model.head
+      rename_map:
+        model.encoder: encoder
+        model.fpn: fpn
+        model.head: head
+    optimizer_kwargs:
+      name: AdamW
+      auto_no_weight_decay: True
+      param_groups:
+      - lr: 0.0005
+        weight_decay: 0.01
+        param_group_prefix: ["fpn", "head"]
+      - lr: 0.00005
+        weight_decay: 0.01
+        param_group_prefix: ["encoder"]
+    lr_scheduler_kwargs:
+      name: CosineAnnealingWithWarmup
+      interval: step
+      frequency: 1
+      warmup_iters: [280, 280]
+      start_iter: [0, 280]
+      total_iters: [4200, 4200] 
+      eta_min: [0.0001, 0.00001]
+    loss_fn_kwargs:
+      name: "monai:DiceCELoss"
+      sigmoid: True
+    inference_settings:
+      postprocess: get_postprocess_segmentation_transforms
+    metrics:
+      - name:
+          DiceMetric
+    compute_metrics_every_n_steps: 50
+    artifacts_settings:
+      log_every_n_steps: 200
+      log_max_n_items: 1
+
+  # Checkpoint settings
+  ckpt_settings:
+    new_version: False
+    model_checkpoint:
+    save_every_n_epochs: 100
+    save_top_k: 1
+    save_last: True
+
+  # Callback settings (other than model checkpointing)
+  pl_callback_settings:
+    - name: SWAAvgOnly
+      start_epoch: 300
+      update_on: epoch
+
+  # Trainer settings (pl.Trainer kwargs)
+  pl_trainer_settings:
+    max_epochs: 400
+    accumulate_grad_batches: 1
+    gradient_clip_val: 1.0
+    gradient_clip_algorithm: norm
+    precision: bf16-mixed
+    devices: 1
+    strategy: auto
+    accelerator: auto
+    profiler: simple
+    num_nodes: 1
+    log_every_n_steps: 100
+    val_check_interval: 1.0
+    check_val_every_n_epoch: 1
+    num_sanity_val_steps: 2
+    overfit_batches: 0.0
+    limit_train_batches: 1.0
+    limit_val_batches: 1.0
+    limit_test_batches: 1.0
+    limit_predict_batches: 1.0
+    fast_dev_run: False
+
+TestWorkflow:
+  # Global settings
+  global_settings:
+    seed: 12345
+    project: synthFCD
+    experiment: 
+      - simple_fcd-minimal_44-finetune_42-used_dec
+      - simple_fcd-minimal_44-finetune_43-used_dec
+      - simple_fcd-minimal_44-finetune_44-used_dec
+    root_dir: /projects/prjs1526/anyBrainer/experiments  # replace with your path
+
+  # Logging settings
+  logging_settings:
+    dev_mode: False
+    worker_logs: False
+    save_logs: True
+    wandb_enable: True
+    wandb_entity: petros-koutsouvelis-maastricht-university
+    wandb_watch_enable: False
+
+  # Data settings
+  pl_datamodule_settings:
+    name: MultimodalDataModule
+    data_dir: /scratch-shared/pkoutsouvelis/bonn_fcd-test-npy  # replace with your path
+    data_handler_kwargs:
+      data_format: GenericNifti
+      exts: [".npy"]
+    train_val_test_split: [0.0, 0.0, 1.0]
+    num_workers: 8
+    batch_size: 4
+    extra_dataloader_kwargs:
+      shuffle: False
+      pin_memory: False
+    test_transforms: 
+      name: get_segmentation_transforms
+      input_size: 128
+      standard_spatial_size: [160, 192, 160]
+      keys: ["ch1", "ch2"]
+      seg_key: "label"
+      out_key: "img"
+      val_mode: True
+    extra_kwargs:
+      modalities_per_ch: 
+        - ["t1"]
+        - ["flair"]
+      distinct_modalities: True
+      distinct_acquisitions: True
+      labels_settings:
+        labels_file: "mask.npy"
+        store_key: "label"
+
+  # Model
+  pl_module_settings:
+    name: MultimodalDownstreamModel
+    model_kwargs:
+      name: Multimodal3DSwinMIMFPN
+      in_channels: 2
+      patch_size: 2
+      depths: [2, 2, 6, 2]
+      num_heads: [3, 6, 12, 24]
+      window_size: 7
+      embed_dim: 48
+      use_v2: True
+      extra_swin_kwargs:
+        use_checkpoint: True
+      use_vanilla_swin: True
+      merge_mode: and
+      inject_modality_tokens: False
+      expected_modalities: ~
+      fusion: none
+      fpn_width: 32
+      out_channels: 1
+    # Needed for initializing the pl_module; unused in this workflow
+    optimizer_kwargs:
+      name: AdamW
+      auto_no_weight_decay: True
+      param_groups:
+      - lr: 0.0005
+        weight_decay: 0.01
+        param_group_prefix: ["fpn", "head"]
+      - lr: 0.00005
+        weight_decay: 0.01
+        param_group_prefix: ["encoder"]
+    lr_scheduler_kwargs:
+      name: CosineAnnealingWithWarmup
+      interval: step
+      frequency: 1
+      warmup_iters: [280, 280]
+      start_iter: [0, 280]
+      total_iters: [4200, 4200] 
+      eta_min: [0.0001, 0.00001]
+    loss_fn_kwargs:
+      name: "monai:DiceCELoss"
+      sigmoid: True
+    inference_settings:
+      inferer_kwargs: 
+        name: SlidingWindowInferer
+        roi_size: 128
+        mode: constant
+        overlap: 0.5
+      postprocess: get_postprocess_segmentation_transforms
+    metrics:
+      - name:
+          DiceMetric
+      - name:
+          MeanIoU
+    artifacts_settings:
+      log_every_n_steps: 200
+      log_max_n_items: 1
+
+  # Callback settings (other than metric aggregation)
+  pl_callback_settings: []
+
+# Sweep settings
+sweep_settings:
+  update_exp_name: False
+  sweeps:
+    1: # seeds
+      - TrainWorkflow.global_settings.seed
+      - TrainWorkflow.global_settings.experiment
+      - TestWorkflow.global_settings.experiment

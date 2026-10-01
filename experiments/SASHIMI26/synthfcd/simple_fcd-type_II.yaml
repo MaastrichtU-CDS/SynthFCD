@@ -1,0 +1,18 @@
+workflow: simple_fcd
+settings:
+  explorer:
+    patterns: "**/anat/*_T1w.nii*"
+  seg_mask_suffix: _synthseg
+  modality_suffixes: ["_T1w", "_FLAIR"]
+  modality_names: ["T1like", "T2like"]
+  param_presets: type_II_only
+  num_workers: 8
+  log_file: /projects/prjs1526/logs/synthfcd/simple_fcd-type_II_only-44.log  # replace with your path
+  out_dir: /scratch-shared/pkoutsouvelis/simple_fcd-type_II_only-44  # replace with your path
+  out_image_suffix: synthfcd
+  out_seg_mask_suffix: synthfcd
+  out_lesion_mask_suffix: lesion_synthfcd
+  random_seed: 44
+
+inputs:
+  - /scratch-shared/pkoutsouvelis/synthfcd-base  # replace with your path

@@ -3,7 +3,7 @@ Name: synthFCD
 Version: 0.1.0
 Summary: A phenomenological simulator of focal cortical dysplasia (FCD) on structural MRI.
 Author: Petros Koutsouvelis
-License: MIT
+License: BSD-3-Clause
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
 License-File: LICENSE
@@ -31,7 +31,7 @@ Dynamic: license-file
 
 # SynthFCD
 
-![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
+![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
 
 A phenomenological simulator of focal cortical dysplasia (FCD) on structural MRI.
 
@@ -90,7 +90,7 @@ migration trajectory.
 
 ## Installation
 
-Python 3.10 or newer is required.
+Python 3.11 or newer is required.
 
 ```bash
 git clone https://github.com/pkoutsouvelis/synthFCD.git
@@ -319,4 +319,4 @@ publication.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+BSD-3-Clause. See [LICENSE](LICENSE).

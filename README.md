@@ -59,7 +59,7 @@ migration trajectory.
 
 ## Installation
 
-Python 3.10 or newer is required.
+Python 3.11 or newer is required.
 
 ```bash
 git clone https://github.com/pkoutsouvelis/synthFCD.git
