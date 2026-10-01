@@ -10,7 +10,7 @@ LATER VERSIONS:
 
 CURRENT VERSION:
 1. Switch to `spawn` mp context to remove test warning
-2. Publish to PYPI
+2. Add CI + publish to PYPI
 3. Add SynthSeg and HD-BET configs + eval notebook
 4. Add paper link and citation in README
 5. Add an ensemble model in HuggingFace and an anyBrainer inference config (maybe script that runs preprocessing + inference end-to-end).
