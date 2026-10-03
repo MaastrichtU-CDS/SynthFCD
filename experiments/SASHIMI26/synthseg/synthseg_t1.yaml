@@ -1,1 +1,37 @@
-# The exact config will be pasted here soon.
+# synthseg-wrapper config for the preprocessed healthy T1w-FLAIR subset of FOMO300k
+
+input:
+  dataset:
+    root: /scratch-shared/pkoutsouvelis/SynthFCD-FOMO300k  # replace with your path
+    patterns: "**/anat/*T1w_reg-cropped.nii*"
+    filters:
+      name: ComposeFilter
+      kwargs:
+        logic: AND
+        filters:
+          - name: IncludeIfFileExists
+            kwargs:
+              filename_pattern: "*FLAIR_reg-cropped.nii*"
+              
+
+output:
+  output_dir: /scratch-shared/pkoutsouvelis/SynthFCD-FOMO300k  # replace with your path
+  save_segmentation: true
+  segmentation_suffix: synthseg
+  overwrite: true
+
+synthseg:
+  synthseg_home: /projects/prjs1526/Photo-SynthSeg  # replace with your path
+  python_executable: null
+  parc: true
+  robust: true
+  fast: false
+  ct: false
+  cpu: false
+  threads: 4
+  crop: null
+  v1: false
+
+logging:
+  log_dir: /projects/prjs1526/logs/synthseg/synthfcd  # replace with your path
+  level: INFO

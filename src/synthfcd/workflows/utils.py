@@ -33,6 +33,7 @@ __all__ = [
 
 import json
 import logging
+import multiprocessing as mp
 import os
 from collections.abc import Callable, Iterable
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -617,7 +618,8 @@ def execute(
             The staged subject records to process.
         num_workers (int | Literal["auto"], optional):
             Number of worker processes. ``1`` runs serially; ``"auto"`` uses the
-            CPU count. Defaults to ``1``.
+            CPU count. Defaults to ``1``. Parallel workers use the ``spawn``
+            start method so forking a multi-threaded parent process is avoided.
         logger (logging.Logger | None, optional):
             Logger for per-item progress messages. Defaults to ``None``.
 
@@ -645,7 +647,9 @@ def execute(
             results.append(status)
         return results
 
-    with ProcessPoolExecutor(max_workers=workers) as executor:
+    with ProcessPoolExecutor(
+        max_workers=workers, mp_context=mp.get_context("spawn")
+    ) as executor:
         futures = {executor.submit(fn, item): item for item in items}
         for future in as_completed(futures):
             status = future.result()

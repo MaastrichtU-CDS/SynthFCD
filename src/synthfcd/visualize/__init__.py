@@ -4,6 +4,7 @@ Helpers for visualizing the results of the synthFCD products.
 Will not be a part of the shipped package.
 """
 
+from .gif import create_gif
 from .histograms import plot_histograms
 from .label_intensity import plot_npy_label_intensity_3d
 from .label_slices import plot_npy_label_slices
@@ -19,6 +20,7 @@ from .volumes import plot_npy_volumes
 
 __all__ = [
     "DEFAULT_LABELS",
+    "create_gif",
     "mask_outline",
     "overlay_intensity_field",
     "overlay_mask",

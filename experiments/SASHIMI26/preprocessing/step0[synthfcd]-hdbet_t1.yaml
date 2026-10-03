@@ -1,1 +1,41 @@
-# The exact config will be pasted here soon.
+# hd-bet-wrapper config for healthy T1w scans (with a FLAIR in the same dir) of FOMO300K
+
+input:
+  dataset:
+    root: /projects/prjs1526/data-pretraining/FOMO300k  # replace with your FOMO300k root path
+    pattern: "**/anat/*T1w.nii*"
+    filters:
+      name: ComposeFilter
+      kwargs:
+        logic: AND
+        filters:
+          - name: IncludeFromTable
+            kwargs:
+              table_path: /projects/prjs1526/data-pretraining/FOMO300K/participants.tsv  # replace with your path
+              id_column: dataset_subject_session
+              criteria_column: group
+              criteria_value: Control
+              id_pattern: "{id}"
+          - name: IncludeIfFileExists
+            kwargs:
+              filename_pattern: "*FLAIR.nii*"
+              
+
+output:
+  output_dir: /scratch-shared/pkoutsouvelis/SynthFCD-FOMO300k  # replace with your path
+  save_mask: true
+  save_bet_image: true
+  mask_suffix: mask
+  bet_image_suffix: bet
+  overwrite: false
+
+hdbet:
+  device: cuda
+  use_tta: true
+  num_processes_preprocessing: 4
+  num_processes_segmentation_export: 8
+  verbose: true
+
+logging:
+  log_dir: /projects/prjs1526/logs/hd-bet/synthfcd-t1  # replace with your path
+  level: INFO

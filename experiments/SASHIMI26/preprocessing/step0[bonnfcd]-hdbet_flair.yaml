@@ -1,1 +1,40 @@
-# The exact config will be pasted here soon.
+# hd-bet-wrapper config for FLAIR scans of UH Bonn FCD dataset
+
+input:
+  dataset:
+    root: /scratch-shared/pkoutsouvelis/bonn_fcd  # replace with your Bonn FCD root path
+    patterns: "**/anat/*_FLAIR.nii*"
+    filters:
+      name: ComposeFilter
+      kwargs:
+        logic: AND
+        filters:
+          - name: IncludeFromTable
+            kwargs:
+              table_path: /scratch-shared/pkoutsouvelis/bonn_fcd/participants.tsv  # replace with your path
+              id_column: participant_id
+              criteria_column: group
+              criteria_value: fcd
+              id_pattern: "{id}"
+          - name: IncludeIfFileExists
+            kwargs:
+              filename_pattern: "*_T1w.nii*"
+              
+
+output:
+  output_dir: /scratch-shared/pkoutsouvelis/bonn_fcd  # replace with your path
+  save_mask: false
+  save_bet_image: true
+  bet_image_suffix: bet
+  overwrite: false
+
+hdbet:
+  device: cuda
+  use_tta: true
+  num_processes_preprocessing: 4
+  num_processes_segmentation_export: 8
+  verbose: true
+
+logging:
+  log_dir: /projects/prjs1526/logs/hd-bet/bonnfcd-flair  # replace with your path
+  level: INFO
