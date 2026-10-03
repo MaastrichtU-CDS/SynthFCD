@@ -21,6 +21,7 @@ Requires-Dist: jupyter>=1.0.0; extra == "dev"
 Requires-Dist: pytest>=7.0; extra == "dev"
 Requires-Dist: pytest-cov; extra == "dev"
 Requires-Dist: ruff; extra == "dev"
+Requires-Dist: black; extra == "dev"
 Requires-Dist: docformatter; extra == "dev"
 Requires-Dist: interrogate; extra == "dev"
 Requires-Dist: pre-commit; extra == "dev"
@@ -32,15 +33,17 @@ Dynamic: license-file
 # SynthFCD
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
+[![CI](https://github.com/MaastrichtU-CDS/SynthFCD/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MaastrichtU-CDS/SynthFCD/actions/workflows/ci.yml)
+[![medRxiv](https://img.shields.io/badge/medRxiv-10.64898/2026.10.01.26364470-b31b1b)](https://www.medrxiv.org/content/10.64898/2026.10.01.26364470v1)
 
 A phenomenological simulator of focal cortical dysplasia (FCD) on structural MRI.
 
 SynthFCD is a scientific library and simulation engine: it grows anatomically
 grounded lesion masks in healthy brains and applies a composition of
-hand-crafted geometric and intensity transformations that reproduce common
-radiological signs of FCD.
+hand-crafted geometric and intensity transformations that emulate hallmark
+radiological features of FCD.
 
-![Example SynthFCD outputs on T1-weighted and FLAIR MRI](figures/example_outputs.png)
+![SynthFCD effects on T1-weighted and FLAIR MRI](figures/synthfcd_viz.gif)
 
 ## Motivation
 
@@ -56,7 +59,9 @@ fine-tuned on real FCD cases from the University Hospital Bonn (UHB) cohort.
 Detection-rate gains reached 18.5 percentage points over training from scratch
 and 7.4 points over self-supervised pretraining, with 0.366 DSC on the held-out
 UHB benchmark. Those numbers describe one use of the simulator; the library is
-meant to be reused, reconfigured, and extended beyond that experiment.
+meant to be reused, reconfigured, and extended beyond that experiment. Details
+are in the
+[medRxiv preprint](https://www.medrxiv.org/content/10.64898/2026.10.01.26364470v1).
 
 ## Simulation pipeline
 
@@ -312,10 +317,18 @@ Slow, visualisation, and implementation-exact tests are marked (`slow`, `viz`,
 
 ## Citation
 
-If you use SynthFCD in academic work, please cite the accompanying paper on
-simulation-based FCD data generation and its use for pretraining lesion
-segmentation models. A formal bibliographic entry will be added here upon
-publication.
+If you use SynthFCD in academic work, please cite the
+[medRxiv preprint](https://www.medrxiv.org/content/10.64898/2026.10.01.26364470v1):
+
+```
+@article {Koutsouvelis2026.10.01.26364470,
+	author = {Koutsouvelis, Petros and Amirrajab, Sina and Volmer, Leroy and Eekers, Danielle B. P. and Schijns, Olaf E. M. G. and Brecheisen, Ralph and Dekker, Andre},
+	title = {Simulating the Radiological Appearance of Focal Cortical Dysplasia in MRI},
+	year = {2026},
+	doi = {10.64898/2026.10.01.26364470},
+	journal = {medRxiv}
+}
+```
 
 ## License
 

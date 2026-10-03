@@ -21,6 +21,9 @@ from .grow_target import ToTarget, grow_target
 from .simple_fcd import SimpleFCD, simple_fcd_simulator
 
 __all__ = [
+    "AppliesEffects",
+    "SimpleFCD",
+    "ToTarget",
     "apply_effects",
     "grow_target",
     "simple_fcd_simulator",

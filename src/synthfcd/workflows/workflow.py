@@ -41,4 +41,7 @@ class SimulationWorkflow(ABC):
         inputs: str | Path | list[str | Path],
         dry_run: bool = False,
     ) -> dict[str, Any]:
+        """
+        Invoke :meth:`run` so the workflow can be used as a callable.
+        """
         return self.run(inputs, dry_run)

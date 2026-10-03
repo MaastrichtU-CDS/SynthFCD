@@ -42,6 +42,7 @@ src/synthfcd/utils/data.py
 src/synthfcd/utils/misc.py
 src/synthfcd/utils/seg_labels.py
 src/synthfcd/visualize/__init__.py
+src/synthfcd/visualize/gif.py
 src/synthfcd/visualize/histograms.py
 src/synthfcd/visualize/label_intensity.py
 src/synthfcd/visualize/label_slices.py

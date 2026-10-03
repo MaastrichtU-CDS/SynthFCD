@@ -1,3 +1,7 @@
+"""
+SynthSeg / FreeSurfer-style label helpers and enums.
+"""
+
 from __future__ import annotations
 
 __all__ = [

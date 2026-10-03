@@ -9,5 +9,4 @@ LATER VERSIONS:
 8. Make deformation effects return single composed field instead of lists; warp using the composed field.
 
 CURRENT VERSION:
-1. Add CI + publish to PYPI
-2. Add an ensemble model in HuggingFace and an anyBrainer inference config (maybe script that runs preprocessing + inference end-to-end).
+1. Add an ensemble model in HuggingFace and an anyBrainer inference config (maybe script that runs preprocessing + inference end-to-end).

@@ -34,6 +34,7 @@ dev = [
     "pytest>=7.0",
     "pytest-cov",
     "ruff",
+    "black",
     "docformatter",
     "interrogate",
     "pre-commit",
@@ -61,25 +62,42 @@ addopts = "-m 'not viz'"
 
 [tool.black]
 line-length = 88
-target-version = ["py310"]
+target-version = ["py311"]
 
 [tool.ruff]
 line-length = 88
+target-version = "py311"
+src = ["src", "tests"]
 
 [tool.ruff.lint]
-extend-select = ["D"]  # enable docstring linting
+# Pin an explicit set: Ruff 0.16+ enables a broad default rule list.
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "D",
+]
 extend-ignore = [
     "D200",  # Allow multi-line module docstrings
     "D203",  # One blank line before class docstring (conflicts with D211)
     "D205",  # Summary + description blank line rule (NumPy convention differs)
+    "D212",  # Summary on first line (NumPy puts summary on the next line)
     "D213",  # Summary on first line (NumPy allows summary on next line)
     "D400",  # Period at end of first line (NumPy does not require)
     "D401",  # Imperative mood (NumPy does not strictly require)
+    "D413",  # Blank line after last section (NumPy does not require)
     "D415",  # Closing punctuation rule
+    "D417",  # Missing arg descriptions (often **kwargs / forwarded params)
+    "E741",  # Ambiguous names like lobe index `l`
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D"]  # Ignore docstrings in tests
+"src/synthfcd/__init__.py" = ["D104"]
+"src/synthfcd/presets/__init__.py" = ["F403", "F405"]
+"src/synthfcd/utils/__init__.py" = ["F403", "F405"]
+"src/synthfcd/visualize/*" = ["D"]  # Visualization helpers are not shipped
 
 [tool.docformatter]
 wrap-summaries = 88

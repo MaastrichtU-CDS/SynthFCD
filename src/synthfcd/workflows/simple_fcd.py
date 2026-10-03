@@ -46,6 +46,10 @@ from .utils import (
 
 
 class SimpleFCDWorkflow(SimulationWorkflow):
+    """
+    End-to-end workflow that discovers subjects and runs SimpleFCD.
+    """
+
     def __init__(
         self,
         *,
@@ -75,6 +79,9 @@ class SimpleFCDWorkflow(SimulationWorkflow):
         random_state: _RNGType | None = None,
         label_enum: _LabelEnumType = SynthSegLabel,
     ) -> None:
+        """
+        Configure discovery, sampling, execution, and output writing.
+        """
         # Configure the data explorer
         if explorer is not None:
             self._explorer = self._get_explorer(explorer)

@@ -142,11 +142,11 @@ def get_data_explorer(
     levels: dict[str, str | Sequence[str]] | None = None,
     filters: _FilterConfigType | None = None,
 ) -> _DataExplorerType:
-    """
+    r"""
     Instantiate nifti-finder's :class:`~nifti_finder.explorers.FileFinder`.
 
     Args:
-        patterns: Glob pattern or list of patterns (default ``\"*.nii*\"``).
+        patterns: Glob pattern or list of patterns (default ``"*.nii*"``).
         levels: Optional named directory-traversal levels. ``None`` (default)
             enables flat recursive search. An empty mapping is rejected.
         filters: Optional filter config mapping (``{name, kwargs}``). A list of
