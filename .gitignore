@@ -1,0 +1,31 @@
+# Build / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Caches / tooling
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+.uv-ci-cache/
+.uv-ci-tools/
+
+# Editor / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
